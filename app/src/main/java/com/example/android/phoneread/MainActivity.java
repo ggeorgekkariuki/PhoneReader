@@ -18,6 +18,7 @@ import android.util.Patterns;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -27,9 +28,17 @@ import java.util.regex.Pattern;
 public class MainActivity extends AppCompatActivity {
 
     public TextView emailTextView;
-    public TextView phoneNumberTextView;
-    public String phoneNumber;
-    public String possibleEmail;
+    public TextView IMEITextView;
+    public TextView phoneNumbersView;
+    public TextView simSerialView;
+    public TextView networkView;
+    public int emailCount = 1;
+    public int phoneNumberCount = 1;
+    public int IMEICount = 1;
+    public int networkCount = 1;
+    public int simSerialCount = 1;
+    public String email;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) throws SecurityException {
@@ -56,85 +65,101 @@ public class MainActivity extends AppCompatActivity {
 
         //emailTextView.setText(phoneNumber);
 
-       // Get the Google Email details from the phone
+        // Get the Google Email details from the phone
         emailTextView = (TextView) findViewById(R.id.emailView);
 
         AccountManager am = AccountManager.get(this);
         Account[] phoneAccounts = am.getAccounts();
 
-        HashMap<Integer, String> hashMap = new HashMap<>();
+        HashMap<String, String> hashMap = new HashMap<>();
 
 
         ArrayList<String> googleAccounts = new ArrayList<String>();
-        int index = 1;
+
         for (Account ac : phoneAccounts) {
             String acname = ac.name;
             String actype = ac.type;
             // Take your time to look at all available accounts
 
-                if(actype.equals("com.google")) {
-                    phoneNumber = ac.name;
-                    Log.d("Google Accounts : ", phoneNumber);
+            if (actype.equals("com.google")) {
+                email = ac.name;
+                Log.d("Google Accounts : ", email);
 
-                    hashMap.put(index, phoneNumber);
-                    index++;
-                }
-
-
+                hashMap.put("email_address" + emailCount, email);
+                emailCount++;
             }
 
-            Log.d("Hash map Accounts", String.valueOf(hashMap));
 
-
-        emailTextView.setText(hashMap.get(0));
         }
 
+        Log.d("Hash map Accounts", String.valueOf(hashMap));
+
+
+        emailTextView.setText(hashMap.get("email_address1"));
+
+
+//        HashMap<Integer, String> telephoneHash = new HashMap<>();
+//        int telIndex = 1;
+
+        phoneNumbersView = (TextView) findViewById(R.id.phoneNumberView);
+        TelephonyManager tm = (TelephonyManager)
+                getSystemService(Context.TELEPHONY_SERVICE);
+        //---get the phone number---
+        String telNumber = tm.getLine1Number();
+        if(telNumber.trim().length() == 0){
+            hashMap.put("phone_number" + phoneNumberCount, "No number");
+            phoneNumberCount++;
+        } else {
+            hashMap.put("phone_number" + phoneNumberCount, telNumber);
+            phoneNumberCount++;
+        }
+        Log.d("Hash map Accounts", String.valueOf(hashMap));
+
+        phoneNumbersView.setText(hashMap.get("phone_number1"));
+////        if (telNumber.length() < 10)
+////            Toast.makeText(this, "Phone number: UNKNOWN",
+////                    Toast.LENGTH_LONG).show();
+////        else
+////            Toast.makeText(this, "Phone number: " + telNumber,
+////                    Toast.LENGTH_LONG).show();
+////        //---get the IMEI number---
 
 //
-//        TelephonyManager tm = (TelephonyManager)
-//                getSystemService(Context.TELEPHONY_SERVICE);
-//        //---get the phone number---
-//        String telNumber = tm.getLine1Number();
-//        if (telNumber.length() < 10)
-//            Toast.makeText(this, "Phone number: UNKNOWN",
-//                    Toast.LENGTH_LONG).show();
-//        else
-//       Toast.makeText(this, "Phone number: " + telNumber,
-//                    Toast.LENGTH_LONG).show();
-//        //---get the IMEI number---
-//        String IMEI = tm.getDeviceId();
+        IMEITextView = (TextView) findViewById(R.id.IMEIView);
+        String IMEI = tm.getDeviceId();
+        if(IMEI.length() != 0){
+            hashMap.put("imei_number" + IMEICount, tm.getDeviceId());
+            IMEICount++;
+        }
+        Log.d("Hash map Accounts", String.valueOf(hashMap));
+        IMEITextView.setText(hashMap.get("imei_number1"));
+
+//
+//
+//
 //        if (IMEI != null)
 //            Toast.makeText(this, "IMEI number: " + IMEI,
 //                    Toast.LENGTH_LONG).show();
-//        //---get Service provider
-//        String serviceProvider = tm.getNetworkOperatorName();
+        //---get Service provider
+        networkView = (TextView) findViewById(R.id.serviceProviderView);
+        String serviceProvider = tm.getNetworkOperatorName();
+        hashMap.put("network_provider" + networkCount, serviceProvider);
+        networkCount++;
+        Log.d("Hash map Accounts", String.valueOf(hashMap));
+        networkView.setText(hashMap.get("network_provider1"));
+
+        simSerialView = (TextView) findViewById(R.id.simSerialNumberView);
+        hashMap.put("sim_serial_number"+simSerialCount, tm.getSimSerialNumber());
+        simSerialCount++;
+        simSerialView.setText(hashMap.get("sim_serial_number1"));
+
+//
 //        Toast.makeText(this, "Network operator: " + serviceProvider,
 //                Toast.LENGTH_LONG).show();
+//
 
 
     }
 
-//    public String getUniqueID() {
-//        String myAndroidDeviceId = "";
-//        TelephonyManager mTelephony = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-//        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-//            // TODO: Consider calling
-//            //    ActivityCompat#requestPermissions
-//            // here to request the missing permissions, and then overriding
-//            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-//            //                                          int[] grantResults)
-//            // to handle the case where the user grants the permission. See the documentation
-//            // for ActivityCompat#requestPermissions for more details.
-//            if (mTelephony.getLine1Number() != null) {
-//                myAndroidDeviceId = mTelephony.getLine1Number();
-//            } else {
-//                myAndroidDeviceId = Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
-//            }
-//        }
-//        return myAndroidDeviceId;
-//    }
-//
-//    public interface IOnlyOwnerSimSupport{
-//
-//    }
+}
 
